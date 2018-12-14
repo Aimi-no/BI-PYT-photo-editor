@@ -1,5 +1,5 @@
 import numpy as np
-import PIL as p
+from PIL import Image
 from pathlib import Path
 
 
@@ -32,7 +32,7 @@ while intext != 'end':
 
     elif intext == 'end':
         pass
-
+#-------------------LOAD----------------#
     elif intext.startswith('load'):
         if filename != '':
             print('There is already an image loaded, only one image can be edited at a time')
@@ -42,11 +42,20 @@ while intext != 'end':
                 print('File does not exist')
             else:
                 print('Loading file: ' + filename)
+                im = Image.open(filename)
+                image = np.asarray(im)
+                #print(image)
+
     elif filename != '':
+# -------------------CLOSE----------------#
         if intext == 'close':
-            print('Saving and closing image')
+            newfile = filename.split('.')[0] + '_edited.' + filename.split('.')[1]
+            print('Saving image as ' + newfile + ' and closing')
+            out = Image.fromarray(image, 'RGB')
+            out.save(newfile)
             filename = ''
 
+#-------------------MIRROR----------------#
         elif intext.startswith('mirror'):
             axis = intext.split(' ')[1]
             if axis != 'x' and axis != 'y':
@@ -54,6 +63,7 @@ while intext != 'end':
             else:
                 print('Mirroring image around ' + axis + '-axis')
 
+#-------------------ROTATE----------------#
         elif intext.startswith('rotate'):
             try:
                 angle = int(intext.split(' ')[1])
@@ -65,12 +75,17 @@ while intext != 'end':
             else:
                 print('Invalid angle')
 
+#-------------------NEGATIVE----------------#
+        #pixel = 255 - pixel
         elif intext == 'negative':
             print('Making a negative of the image')
 
+#-------------------GRAYSCALE----------------#
+        #′Y′601=0.299*R′+0.587*G′+0.114*B'
         elif intext == 'grayscale':
             print('Converting image to grayscale')
 
+#-------------------LIGHTNESS----------------#
         elif intext.startswith('lightness'):
             try:
                 light = int(intext.split(' ')[1])
@@ -83,7 +98,10 @@ while intext != 'end':
             else:
                 print('Number does not meet expectations')
 
+#-------------------EDGES----------------#
         elif intext.startswith('edges'):
             print('Sharpening edges')
+        else:
+            print('Unknown command, type \'help\' to see available commands')
     else:
         print('Unknown command or no loaded image, type \'help\' to see available commands')
