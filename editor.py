@@ -7,6 +7,8 @@ print('For help type in \'help\'.')
 
 intext = ''
 
+filename = ''
+
 while intext != 'end':
     try:
         intext = input()
@@ -32,53 +34,56 @@ while intext != 'end':
         pass
 
     elif intext.startswith('load'):
-        filename = intext.split(' ')[1]
-        if not Path(filename).exists():
-            print('File does not exist')
+        if filename != '':
+            print('There is already an image loaded, only one image can be edited at a time')
         else:
-            print('Loading file: ' + filename)
+            filename = intext.split(' ')[1]
+            if not Path(filename).exists():
+                print('File does not exist')
+            else:
+                print('Loading file: ' + filename)
+    elif filename != '':
+        if intext == 'close':
+            print('Saving and closing image')
+            filename = ''
 
-    elif intext == 'close':
-        print('Saving and closing image')
+        elif intext.startswith('mirror'):
+            axis = intext.split(' ')[1]
+            if axis != 'x' and axis != 'y':
+                print('Invalid axis')
+            else:
+                print('Mirroring image around ' + axis + '-axis')
 
-    elif intext.startswith('mirror'):
-        axis = intext.split(' ')[1]
-        if axis != 'x' and axis != 'y':
-            print('Invalid axis')
-        else:
-            print('Mirroring image around ' + axis + '-axis')
+        elif intext.startswith('rotate'):
+            try:
+                angle = int(intext.split(' ')[1])
+            except:
+                print('Invalid angle')
+                angle = 0
+            if angle != 0 and angle % 90 == 0:
+                print('Rotating image, angle of rotation is: ' + str(angle))
+            else:
+                print('Invalid angle')
 
-    elif intext.startswith('rotate'):
-        try:
-            angle = int(intext.split(' ')[1])
-        except:
-            print('Invalid angle')
-            angle = 0
-        if angle != 0 and angle % 90 == 0:
-            print('Rotating image, angle of rotation is: ' + str(angle))
-        else:
-            print('Invalid angle')
+        elif intext == 'negative':
+            print('Making a negative of the image')
 
-    elif intext == 'negative':
-        print('Making a negative of the image')
+        elif intext == 'grayscale':
+            print('Converting image to grayscale')
 
-    elif intext == 'grayscale':
-        print('Converting image to grayscale')
+        elif intext.startswith('lightness'):
+            try:
+                light = int(intext.split(' ')[1])
+            except:
+                print('Invalid number')
+                light = 0
 
-    elif intext.startswith('lightness'):
-        try:
-            light = int(intext.split(' ')[1])
-        except:
-            print('Invalid number')
-            light = 0
+            if light != 0 and light >= -100 and light <= 100:
+                print('Changing lightness of image to ' + str(light))
+            else:
+                print('Number does not meet expectations')
 
-        if light != 0 and light >= -100 and light <= 100:
-            print('Changing lightness of image to ' + str(light))
-        else:
-            print('Number does not meet expectations')
-
-    elif intext.startswith('edges'):
-        print('Sharpening edges')
-
+        elif intext.startswith('edges'):
+            print('Sharpening edges')
     else:
-        print('Unknown command, type \'help\' to see available commands')
+        print('Unknown command or no loaded image, type \'help\' to see available commands')
