@@ -2,6 +2,8 @@ import numpy as np
 from PIL import Image
 from pathlib import Path
 
+#TODO png handling
+
 
 print('For help type in \'help\'.')
 
@@ -79,11 +81,13 @@ while intext != 'end':
         #pixel = 255 - pixel
         elif intext == 'negative':
             print('Making a negative of the image')
+            image = 255 - image
 
 #-------------------GRAYSCALE----------------#
         #′Y′601=0.299*R′+0.587*G′+0.114*B'
         elif intext == 'grayscale':
             print('Converting image to grayscale')
+
 
 #-------------------LIGHTNESS----------------#
         elif intext.startswith('lightness'):
@@ -94,7 +98,16 @@ while intext != 'end':
                 light = 0
 
             if light != 0 and light >= -100 and light <= 100:
-                print('Changing lightness of image to ' + str(light))
+                print('Changing lightness of image to ' + str(light) + '%')
+                if light < 0:
+                    image = image // abs(light)
+                elif light > 0:
+                    #light = light * 255 // 100
+                    idx = (image > 255 // light)
+                    image = image * light
+                    image[idx] = 255
+
+
             else:
                 print('Number does not meet expectations')
 
