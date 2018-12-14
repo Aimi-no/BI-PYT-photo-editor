@@ -65,6 +65,17 @@ while intext != 'end':
                 print('Invalid axis')
             else:
                 print('Mirroring image around ' + axis + '-axis')
+                mirrorimage = image.copy()
+                imgsize = image.shape
+                if axis == 'x':
+                    for i in range(imgsize[0]):
+                        for j in range(imgsize[1]):
+                            mirrorimage[i][j] = image[imgsize[0] - i - 1][j]
+                else:
+                    for i in range(imgsize[0]):
+                        for j in range(imgsize[1]):
+                            mirrorimage[i][j] = image[i][imgsize[1] - j - 1]
+                image = mirrorimage
 
 #-------------------ROTATE----------------#
         elif intext.startswith('rotate'):
