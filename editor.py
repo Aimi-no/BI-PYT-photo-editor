@@ -29,6 +29,7 @@ while intext != 'end':
               'Type \'rotate X\', where X equals the rotation in degrees (multiple of 90) to rotate the picture\n'
               'Type \'negative\' to inverse the image colours\n'
               'Type \'grayscale\' to convert the image to grayscale\n'
+              'Type \'sepia\' to apply a sepia filter\n'
               'Type \'lightness X\', where X is an int from -100 to 100, to change the lightness/darkness of the image\n'
               'Type \'edges\' to sharpen edges')
 
@@ -74,6 +75,15 @@ while intext != 'end':
                 angle = 0
             if angle != 0 and angle % 90 == 0:
                 print('Rotating image, angle of rotation is: ' + str(angle))
+                if angle % 360 == 0: # no rotation
+                    pass
+                elif angle % 270 == 0: #rotate left
+                    pass
+                elif angle % 180 == 0: #rotate upside down
+                    pass
+                else: #rotate right
+                    pass
+
             else:
                 print('Invalid angle')
 
@@ -84,9 +94,44 @@ while intext != 'end':
             image = 255 - image
 
 #-------------------GRAYSCALE----------------#
-        #′Y′601=0.299*R′+0.587*G′+0.114*B'
+        #′Y′=0.2126*R′+0.7152*G′+0.0722*B'
         elif intext == 'grayscale':
             print('Converting image to grayscale')
+            #print(image.shape)
+            imsize = image.shape
+            grayimage = image.copy()
+            for i in range(imsize[0]):
+                for j in range(imsize[1]):
+                    pixel = 0.2126 * image[i][j][0] + 0.7152 * image[i][j][1] + 0.0722 * image[i][j][2]
+                    grayimage[i][j][0] = pixel
+                    grayimage[i][j][1] = pixel
+                    grayimage[i][j][2] = pixel
+            image = grayimage
+
+#-------------------SEPIA----------------#
+        #outputRed = (inputRed * .393) + (inputGreen *.769) + (inputBlue * .189)
+        #outputGreen = (inputRed * .349) + (inputGreen *.686) + (inputBlue * .168)
+        #outputBlue = (inputRed * .272) + (inputGreen *.534) + (inputBlue * .131)
+        elif intext == 'sepia':
+            print('Applying sepia filter')
+            #print(image.shape)
+            imsize = image.shape
+            sepiaimage = image.copy()
+            for i in range(imsize[0]):
+                for j in range(imsize[1]):
+                    red = image[i][j][0]
+                    green = image[i][j][1]
+                    blue = image[i][j][2]
+                    sepiared = 0.393 * red + 0.769 * green + 0.189 * blue
+                    sepiagreen = 0.349 * red + 0.686 * green + 0.168 * blue
+                    sepiablue = 0.272 * red + 0.534 * green + 0.131 * blue
+
+                    sepiaimage[i][j][0] = sepiared if sepiared < 255 else 255
+                    sepiaimage[i][j][1] = sepiagreen if sepiagreen < 255 else 255
+                    sepiaimage[i][j][1] = sepiagreen if sepiagreen < 255 else 255
+                    sepiaimage[i][j][2] = sepiablue if sepiablue < 255 else 255
+
+            image = sepiaimage
 
 
 #-------------------LIGHTNESS----------------#
@@ -106,8 +151,6 @@ while intext != 'end':
                     idx = (image > 255 // light)
                     image = image * light
                     image[idx] = 255
-
-
             else:
                 print('Number does not meet expectations')
 
