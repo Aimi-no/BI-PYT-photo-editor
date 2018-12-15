@@ -70,14 +70,10 @@ while intext != 'end':
                 mirrorimage = image.copy()
                 imgsize = image.shape
                 if axis == 'x':
-                    for i in range(imgsize[0]):
-                        for j in range(imgsize[1]):
-                            mirrorimage[i][j] = image[imgsize[0] - i - 1][j]
+                    image = image[::-1, ::, ::]
                 else:
-                    for i in range(imgsize[0]):
-                        for j in range(imgsize[1]):
-                            mirrorimage[i][j] = image[i][imgsize[1] - j - 1]
-                image = mirrorimage
+                    image = image[::, ::-1, ::]
+
 
 #-------------------ROTATE----------------#
         elif intext.startswith('rotate'):
@@ -91,17 +87,16 @@ while intext != 'end':
                 imgsize = image.shape
                 if angle % 360 == 0: # no rotation
                     pass
-                elif angle % 270 == 0: #rotate right
-                    pass
+                elif (angle % 270 == 0 and angle > 0 ) or (angle < 0 and angle % 270 != 0 and angle % 180 != 0): #rotate right
+                    image = np.transpose(image[::-1, ::, ::], axes=[1, 0, 2])
                 elif angle % 180 == 0: #rotate upside down
-                    rotimage = image.copy()
-                    for i in range(imgsize[0]):
-                        for j in range(imgsize[1]):
-                            rotimage[i][j] = image[imgsize[0] - i - 1][imgsize[1] - j - 1]
-                    image = rotimage
+                    image = image[::-1, ::-1, ::]
                 else: #rotate left
-                    pass
-
+                    image = np.transpose(image, axes=[1, 0, 2])[::-1, ::, ::]
+                    #image = np.rot90(image, k = 3, axes=(-2,-1))
+                    #print(rotimage)
+                    #image = rotimage
+                    #print(image)
             else:
                 print('Invalid angle')
 
