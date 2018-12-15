@@ -1,6 +1,8 @@
 import numpy as np
 from PIL import Image
 from pathlib import Path
+import tkinter
+import matplotlib
 
 #TODO png handling
 
@@ -86,13 +88,18 @@ while intext != 'end':
                 angle = 0
             if angle != 0 and angle % 90 == 0:
                 print('Rotating image, angle of rotation is: ' + str(angle))
+                imgsize = image.shape
                 if angle % 360 == 0: # no rotation
                     pass
-                elif angle % 270 == 0: #rotate left
+                elif angle % 270 == 0: #rotate right
                     pass
                 elif angle % 180 == 0: #rotate upside down
-                    pass
-                else: #rotate right
+                    rotimage = image.copy()
+                    for i in range(imgsize[0]):
+                        for j in range(imgsize[1]):
+                            rotimage[i][j] = image[imgsize[0] - i - 1][imgsize[1] - j - 1]
+                    image = rotimage
+                else: #rotate left
                     pass
 
             else:
@@ -168,6 +175,27 @@ while intext != 'end':
 #-------------------EDGES----------------#
         elif intext.startswith('edges'):
             print('Sharpening edges')
+
+#-------------------SHOW----------------#
+ #       elif intext == 'show':
+  #          matplotlib.use('Agg')
+   #         print('Showing image')
+    #        imgsize = image.shape
+     #       root = tkinter.Tk()
+      #      root.geometry(str(imgsize[0]) + "x" + str(imgsize[1]))
+       #     root.title("Image: ")
+
+            #canvas = tkinter.Canvas(root, width=imgsize[0], height=imgsize[1])
+
+            #img = tkinter.PhotoImage(width = WIDTH, height = HEIGHT)
+
+        #    panel = tkinter.Label(root, image=image)
+         #   panel.pack(side="bottom", fill="both", expand="yes")
+
+            #image = canvas.create_image((WIDTH, HEIGHT), image=img, anchor=tkinter.SE)
+            #canvas.pack()
+
+          #  root.mainloop()
         else:
             print('Unknown command, type \'help\' to see available commands')
     else:
