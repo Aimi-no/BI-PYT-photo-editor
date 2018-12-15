@@ -5,6 +5,15 @@ import tkinter
 import matplotlib
 
 #TODO png handling
+def findneigbours(image,i,j):
+    imgsize = image.shape
+    neighbours = np.zeros((imgsize[2]), dtype = int)
+    for x in range(i-1, i+2):
+        for y in range(j-1,j+2):
+            if x != i or y != j:
+                neighbours = neighbours + image[x][y]
+
+    return neighbours
 
 
 print('For help type in \'help\'.')
@@ -32,8 +41,8 @@ while intext != 'end':
               'Type \'negative\' to inverse the image colours\n'
               'Type \'grayscale\' to convert the image to grayscale\n'
               'Type \'sepia\' to apply a sepia filter\n'
-              'Type \'lightness X\', where X is an int from -100 to 100, to change the lightness/darkness of the image\n'
-              'Type \'edges\' to sharpen edges')
+              'Type \'brightness X\', where X is an int from -100 to 100, to increase/decrease the brightness of the image\n'
+              'Type \'sharpen\' to sharpen edges')
 
     elif intext == 'end':
         pass
@@ -49,6 +58,7 @@ while intext != 'end':
                 print('Loading file: ' + filename)
                 im = Image.open(filename)
                 image = np.asarray(im)
+                print('Done')
                 #print(image)
 
     elif filename != '':
@@ -59,6 +69,7 @@ while intext != 'end':
             out = Image.fromarray(image, 'RGB')
             out.save(newfile)
             filename = ''
+            print('Done')
 
 #-------------------MIRROR----------------#
         elif intext.startswith('mirror'):
@@ -73,6 +84,7 @@ while intext != 'end':
                     image = image[::-1, ::, ::]
                 else:
                     image = image[::, ::-1, ::]
+                print('Done')
 
 
 #-------------------ROTATE----------------#
@@ -97,6 +109,7 @@ while intext != 'end':
                     #print(rotimage)
                     #image = rotimage
                     #print(image)
+                print('Done')
             else:
                 print('Invalid angle')
 
@@ -105,21 +118,23 @@ while intext != 'end':
         elif intext == 'negative':
             print('Making a negative of the image')
             image = 255 - image
+            print('Done')
 
 #-------------------GRAYSCALE----------------#
         #′Y′=0.2126*R′+0.7152*G′+0.0722*B'
         elif intext == 'grayscale':
             print('Converting image to grayscale')
             #print(image.shape)
-            imsize = image.shape
+            imgsize = image.shape
             grayimage = image.copy()
-            for i in range(imsize[0]):
-                for j in range(imsize[1]):
+            for i in range(imgsize[0]):
+                for j in range(imgsize[1]):
                     pixel = 0.2126 * image[i][j][0] + 0.7152 * image[i][j][1] + 0.0722 * image[i][j][2]
                     grayimage[i][j][0] = pixel
                     grayimage[i][j][1] = pixel
                     grayimage[i][j][2] = pixel
             image = grayimage
+            print('Done')
 
 #-------------------SEPIA----------------#
         #outputRed = (inputRed * .393) + (inputGreen *.769) + (inputBlue * .189)
@@ -128,10 +143,10 @@ while intext != 'end':
         elif intext == 'sepia':
             print('Applying sepia filter')
             #print(image.shape)
-            imsize = image.shape
+            imgsize = image.shape
             sepiaimage = image.copy()
-            for i in range(imsize[0]):
-                for j in range(imsize[1]):
+            for i in range(imgsize[0]):
+                for j in range(imgsize[1]):
                     red = image[i][j][0]
                     green = image[i][j][1]
                     blue = image[i][j][2]
@@ -145,10 +160,11 @@ while intext != 'end':
                     sepiaimage[i][j][2] = sepiablue if sepiablue < 255 else 255
 
             image = sepiaimage
+            print('Done')
 
 
-#-------------------LIGHTNESS----------------#
-        elif intext.startswith('lightness'):
+#-------------------BRIGHTNESS----------------#
+        elif intext.startswith('brightness'):
             try:
                 light = int(intext.split(' ')[1])
             except:
@@ -156,7 +172,7 @@ while intext != 'end':
                 light = 0
 
             if light != 0 and light >= -100 and light <= 100:
-                print('Changing lightness of image to ' + str(light) + '%')
+                print('Changing brightness of image to ' + str(light) + '%')
                 if light < 0:
                     image = image // abs(light)
                 elif light > 0:
@@ -164,12 +180,28 @@ while intext != 'end':
                     idx = (image > 255 // light)
                     image = image * light
                     image[idx] = 255
+                print('Done')
             else:
                 print('Number does not meet expectations')
 
-#-------------------EDGES----------------#
-        elif intext.startswith('edges'):
-            print('Sharpening edges')
+#-------------------SHARPEN----------------#
+        # pixel = 9*pixel - neighbours
+        elif intext.startswith('sharpen'):
+            print('Sharpening edges, this might take a few seconds')
+            imgsize = image.shape
+            sharpenimage = image.copy()
+            for i in range(1, imgsize[0] - 1):
+                for j in range(1, imgsize[1] - 1):
+                    for k in range(imgsize[2]):
+                        pixel = 9 * image[i][j][k] - image[i+1][j+1][k] - image[i+1][j][k] - image[i+1][j-1][k] - image[i][j+1][k] - image[i][j-1][k] - image[i-1][j+1][k] - image[i-1][j][k] - image[i-1][j-1][k]
+                    #for col in range(imgsize[2]):
+                        if pixel > 0:
+                            sharpenimage[i][j][k] = pixel if pixel < 255 else 255
+                        else:
+                            sharpenimage[i][j][k] = 0
+
+            image = sharpenimage
+            print('Done')
 
 #-------------------SHOW----------------#
  #       elif intext == 'show':
