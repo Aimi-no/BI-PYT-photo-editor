@@ -1,20 +1,22 @@
 import numpy as np
 from PIL import Image
 from pathlib import Path
-import tkinter
+#import tkinter
 
 
-#TODO png handling
 
-def close(image, filename):
-    newfile = filename.split('.')[0] + '_edited.' + filename.split('.')[1]
+#Saves the image
+def save(image, filename):
+    extension = filename.split('.')[1]
+    newfile = filename.split('.')[0] + '_edited.' + extension
     print('Saving image as ' + newfile + ' and closing')
     out = Image.fromarray(image, 'RGB')
     out.save(newfile)
 
 
-print('For help type in \'help\' or type \'help command\' to get detailed information about command')
 
+print('For help type in \'help\' or type \'help command\' to get detailed information about command')
+#using intext to handle commands
 intext = ''
 
 filename = ''
@@ -24,16 +26,20 @@ while intext != 'end':
         intext = input()
     except ValueError:
         print('Input not valid')
+        intext = ''
     except EOFError:
         print('EOF')
+        intext = ''
     except KeyboardInterrupt:
         print('Interrupted')
+        intext = ''
 
+    #documentation
     if intext.startswith('help'):
         instructions = intext.split(' ')
         if len(instructions) == 1:
             print('Type \'end\' to exit the program\n'
-                  'Type \'load filename\' to load a picture named filename\n'
+                  'Type \'load filename\' to load a picture named filename, only jpeg supported\n'
                   'Type \'close\' to close the picture you have been editing\n'
                   'Type \'mirror x\' to mirror image around x-axis or \'mirror y\' to mirror image around y-axis\n'
                   'Type \'rotate X\', where X equals the rotation in degrees (multiple of 90) to rotate the picture\n'
@@ -42,12 +48,14 @@ while intext != 'end':
                   'Type \'sepia\' to apply a sepia filter\n'
                   'Type \'brightness X\', where X is an int from -100 to 100, to increase/decrease the '
                   'brightness of the image\n'
-                  'Type \'sharpen\' to sharpen the image')
+                  'Type \'sharpen\' to sharpen the image\n'
+                  'Type \'channels \'colour\' X\' where color is \'red/green/yellow\' and X is number from -10 to 10'
+                  ' to increase/decrease chosen colour channel')
         elif instructions[1] == 'end':
             print('Type \'end\'. Exits the photo editor but does not save the image.')
         elif instructions[1] == 'load':
             print('Type \'load filename\' to load an image. This command loads the image to be edited. '
-                  'Will not load an image when there is already one loaded.')
+                  'Will not load an image when there is already one loaded. Only jpeg images supported')
         elif instructions[1] == 'close':
             print('Type \'close\'. Saves the picture as \'filename_edited\' and closes the picture. '
                   'Now you can load another one.')
@@ -70,14 +78,19 @@ while intext != 'end':
                   'If X is negative it darkens the image, if it\' positive it lightens it.')
         elif instructions[1] == 'sharpen':
             print('Type \'sharpen\'. Sharpens the image.')
+        elif instructions[1] == 'channels':
+            print('Type \'channels \'colour\' X\'. Colour represents the colour chanel you want to be modified, '
+                  'can be \'red\', \'green\' or \'blue\'. X is a number from -10 to 10, indicates the amount '
+                  'of increase/decrease of the colour channel.')
 
+    #ends the editor, if there is image loaded, asks if user wants to save it
     elif intext == 'end':
         if filename != '':
             print('Your image is not saved, do you wish to save it? [yes/no]')
             try:
                 response = input()
                 if response == 'yes':
-                    close(image, filename)
+                    save(image, filename)
                     filename = ''
                     print('Done')
             except ValueError:
@@ -88,6 +101,7 @@ while intext != 'end':
                 print('Interrupted')
 
 #-------------------LOAD----------------#
+    #loads the image to work with
     elif intext.startswith('load'):
         if filename != '':
             print('There is already an image loaded, only one image can be edited at a time')
@@ -95,6 +109,9 @@ while intext != 'end':
             filename = intext.split(' ')[1]
             if not Path(filename).exists():
                 print('File does not exist')
+            elif filename.split('.')[1] != 'jpg' and filename.split('.')[1] != 'jpeg':
+                print('Wrong file time, only jpeg supported, sorry')
+                filename = ''
             else:
                 print('Loading file: ' + filename)
                 im = Image.open(filename)
@@ -104,12 +121,14 @@ while intext != 'end':
 
     elif filename != '':
 # -------------------CLOSE----------------#
+    #Unloads the imag and saves it
         if intext == 'close':
-            close(image, filename)
+            save(image, filename)
             filename = ''
             print('Done')
 
 #-------------------MIRROR----------------#
+        #Mirror around X or Y axis, done by flipping axis
         elif intext.startswith('mirror'):
             axis = intext.split(' ')[1]
             if axis != 'x' and axis != 'y':
@@ -126,6 +145,7 @@ while intext != 'end':
 
 
 #-------------------ROTATE----------------#
+        #Rotating image, done by a mix of flippping axis and transpositions
         elif intext.startswith('rotate'):
             try:
                 angle = int(intext.split(' ')[1])
@@ -143,15 +163,12 @@ while intext != 'end':
                     image = image[::-1, ::-1, ::]
                 else: #rotate left
                     image = np.transpose(image, axes=[1, 0, 2])[::-1, ::, ::]
-                    #image = np.rot90(image, k = 3, axes=(-2,-1))
-                    #print(rotimage)
-                    #image = rotimage
-                    #print(image)
                 print('Done')
             else:
                 print('Invalid angle')
 
 #-------------------NEGATIVE----------------#
+        #Makes a negative of the picture coloursS
         #pixel = 255 - pixel
         elif intext == 'negative':
             print('Making a negative of the image')
@@ -159,6 +176,7 @@ while intext != 'end':
             print('Done')
 
 #-------------------GRAYSCALE----------------#
+        #Makes image into grayscale using the following formula for each pixel
         #′Y′=0.2126*R′+0.7152*G′+0.0722*B'
         elif intext == 'grayscale':
             print('Converting image to grayscale')
@@ -175,6 +193,7 @@ while intext != 'end':
             print('Done')
 
 #-------------------SEPIA----------------#
+        #Makes image into shades of brown using following formula for each pixel
         #R = (R * 0.393) + (G * 0.769) + (B * 0.189)
         #G = (R * 0.349) + (G * 0.686) + (B * 0.168)
         #B = (R * 0.272) + (G * 0.534) + (B * 0.131)
@@ -202,6 +221,7 @@ while intext != 'end':
 
 
 #-------------------BRIGHTNESS----------------#
+        #Increases/decreases image brigthness by multiplying/dividing each pixel by a given value
         elif intext.startswith('brightness'):
             try:
                 light = int(intext.split(' ')[1])
@@ -223,6 +243,7 @@ while intext != 'end':
                 print('Number does not meet expectations')
 
 #-------------------SHARPEN----------------#
+        #Sharpening the image using the formula bellow for each pixel except pixels at the very edge of the image
         # pixel = 9*pixel - neighbours
         elif intext.startswith('sharpen'):
             print('Sharpening edges, this might take a few seconds')
@@ -241,26 +262,40 @@ while intext != 'end':
             image = sharpenimage
             print('Done')
 
-#-------------------SHOW----------------#
- #       elif intext == 'show':
-  #          matplotlib.use('Agg')
-   #         print('Showing image')
-    #        imgsize = image.shape
-     #       root = tkinter.Tk()
-      #      root.geometry(str(imgsize[0]) + "x" + str(imgsize[1]))
-       #     root.title("Image: ")
+#-------------------COLOUR CHANNELS----------------#
+        #Changes colours by multiplying/dividing given colour channel by a given value for each pixel
+        elif intext.startswith('channels'):
+            splittext = intext.split(' ')
+            color = splittext[1]
+            ratio = int(splittext[2])
+            if color == 'red':
+                idx = 0
+            elif color == 'green':
+                idx = 1
+            elif color == 'blue':
+                idx = 2
+            else:
+                print('Invalid colour')
+                idx = -1
+            if idx != -1:
+                if ratio >= -10 and ratio != 0 and ratio <= 10:
+                    print('Increasing ' + color + ' channel by ' + str(ratio))
+                    imgsize = image.shape
+                    channelimage = image.copy()
+                    for i in range(imgsize[0]):
+                        for j in range(imgsize[1]):
+                            if(ratio > 0):
+                               pixel = image[i][j][idx] * ratio
+                               channelimage[i][j][idx] = pixel if pixel < 255 else 255
+                            else:
+                                ratio = abs(ratio)
+                                channelimage[i][j][idx] = image[i][j][idx] // ratio
+                    image = channelimage
+                    print('Done')
 
-            #canvas = tkinter.Canvas(root, width=imgsize[0], height=imgsize[1])
+                elif ratio != 0:
+                    print('Invalid change ratio')
 
-            #img = tkinter.PhotoImage(width = WIDTH, height = HEIGHT)
-
-        #    panel = tkinter.Label(root, image=image)
-         #   panel.pack(side="bottom", fill="both", expand="yes")
-
-            #image = canvas.create_image((WIDTH, HEIGHT), image=img, anchor=tkinter.SE)
-            #canvas.pack()
-
-          #  root.mainloop()
         else:
             print('Unknown command, type \'help\' to see available commands')
     else:
