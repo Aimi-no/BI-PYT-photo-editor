@@ -2,21 +2,18 @@ import numpy as np
 from PIL import Image
 from pathlib import Path
 import tkinter
-import matplotlib
+
 
 #TODO png handling
-def findneigbours(image,i,j):
-    imgsize = image.shape
-    neighbours = np.zeros((imgsize[2]), dtype = int)
-    for x in range(i-1, i+2):
-        for y in range(j-1,j+2):
-            if x != i or y != j:
-                neighbours = neighbours + image[x][y]
 
-    return neighbours
+def close(image, filename):
+    newfile = filename.split('.')[0] + '_edited.' + filename.split('.')[1]
+    print('Saving image as ' + newfile + ' and closing')
+    out = Image.fromarray(image, 'RGB')
+    out.save(newfile)
 
 
-print('For help type in \'help\'.')
+print('For help type in \'help\' or type \'help command\' to get detailed information about command')
 
 intext = ''
 
@@ -32,20 +29,64 @@ while intext != 'end':
     except KeyboardInterrupt:
         print('Interrupted')
 
-    if intext == 'help':
-        print('Type \'end\' to exit the program\n'
-              'Type \'load filename\' to load a picture named filename\n'
-              'Type \'close\' to close the picture you have been editing\n'
-              'Type \'mirror x\' to mirror image around x-axis or \'mirror y\' to mirror image around y-axis\n'
-              'Type \'rotate X\', where X equals the rotation in degrees (multiple of 90) to rotate the picture\n'
-              'Type \'negative\' to inverse the image colours\n'
-              'Type \'grayscale\' to convert the image to grayscale\n'
-              'Type \'sepia\' to apply a sepia filter\n'
-              'Type \'brightness X\', where X is an int from -100 to 100, to increase/decrease the brightness of the image\n'
-              'Type \'sharpen\' to sharpen edges')
+    if intext.startswith('help'):
+        instructions = intext.split(' ')
+        if len(instructions) == 1:
+            print('Type \'end\' to exit the program\n'
+                  'Type \'load filename\' to load a picture named filename\n'
+                  'Type \'close\' to close the picture you have been editing\n'
+                  'Type \'mirror x\' to mirror image around x-axis or \'mirror y\' to mirror image around y-axis\n'
+                  'Type \'rotate X\', where X equals the rotation in degrees (multiple of 90) to rotate the picture\n'
+                  'Type \'negative\' to inverse the image colours\n'
+                  'Type \'grayscale\' to convert the image to grayscale\n'
+                  'Type \'sepia\' to apply a sepia filter\n'
+                  'Type \'brightness X\', where X is an int from -100 to 100, to increase/decrease the '
+                  'brightness of the image\n'
+                  'Type \'sharpen\' to sharpen the image')
+        elif instructions[1] == 'end':
+            print('Type \'end\'. Exits the photo editor but does not save the image.')
+        elif instructions[1] == 'load':
+            print('Type \'load filename\' to load an image. This command loads the image to be edited. '
+                  'Will not load an image when there is already one loaded.')
+        elif instructions[1] == 'close':
+            print('Type \'close\'. Saves the picture as \'filename_edited\' and closes the picture. '
+                  'Now you can load another one.')
+        elif instructions[1] == 'mirror':
+            print('Type \'mirror x\' to mirror image around x-axis or \'mirror y\' to mirror image around y-axis. '
+                  'Flips the image horizontally for x-axis and vertically for y-axis.')
+        elif instructions[1] == 'rotate':
+            print('Type \'rotate X\', where X equals the rotation in degrees to rotate the picture. '
+                  'The angle must be multiple of 90, can be negative. 90° rotation rotates the image to the left, '
+                  '270° equals to right rotation. -90° equals to 270°')
+        elif instructions[1] == 'negative':
+            print('Type \'negative\' to invert colours of the image. Creates image with (255 - colorOfOriginal) colour.')
+        elif instructions[1] == 'grayscale':
+            print('Type \'grayscale\'. Converts the image colours to shades of gray.')
+        elif instructions[1] == 'sepia':
+            print('Type \'sepia\'. Applies a sepia filter on the image, making all the colours in shades of brown. '
+                  'Creates vintage look.')
+        elif instructions[1] == 'brightness':
+            print('Type \'brightness X\'. X is a number from -100 to 100. Changes the brightness of the image. '
+                  'If X is negative it darkens the image, if it\' positive it lightens it.')
+        elif instructions[1] == 'sharpen':
+            print('Type \'sharpen\'. Sharpens the image.')
 
     elif intext == 'end':
-        pass
+        if filename != '':
+            print('Your image is not saved, do you wish to save it? [yes/no]')
+            try:
+                response = input()
+                if response == 'yes':
+                    close(image, filename)
+                    filename = ''
+                    print('Done')
+            except ValueError:
+                print('Input not valid')
+            except EOFError:
+                print('EOF')
+            except KeyboardInterrupt:
+                print('Interrupted')
+
 #-------------------LOAD----------------#
     elif intext.startswith('load'):
         if filename != '':
@@ -64,10 +105,7 @@ while intext != 'end':
     elif filename != '':
 # -------------------CLOSE----------------#
         if intext == 'close':
-            newfile = filename.split('.')[0] + '_edited.' + filename.split('.')[1]
-            print('Saving image as ' + newfile + ' and closing')
-            out = Image.fromarray(image, 'RGB')
-            out.save(newfile)
+            close(image, filename)
             filename = ''
             print('Done')
 
@@ -137,9 +175,9 @@ while intext != 'end':
             print('Done')
 
 #-------------------SEPIA----------------#
-        #outputRed = (inputRed * .393) + (inputGreen *.769) + (inputBlue * .189)
-        #outputGreen = (inputRed * .349) + (inputGreen *.686) + (inputBlue * .168)
-        #outputBlue = (inputRed * .272) + (inputGreen *.534) + (inputBlue * .131)
+        #R = (R * 0.393) + (G * 0.769) + (B * 0.189)
+        #G = (R * 0.349) + (G * 0.686) + (B * 0.168)
+        #B = (R * 0.272) + (G * 0.534) + (B * 0.131)
         elif intext == 'sepia':
             print('Applying sepia filter')
             #print(image.shape)
