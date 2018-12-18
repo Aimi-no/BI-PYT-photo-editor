@@ -60,7 +60,7 @@ while intext != 'end':
             print('Type \'end\'. Exits the photo editor but does not save the image.')
         elif instructions[1] == 'load':
             print('Type \'load filename\' to load an image. This command loads the image to be edited. '
-                  'Will not load an image when there is already one loaded. Only jpeg images supported')
+                  'Will not load an image when there is already one loaded. Only jpeg and png images supported')
         elif instructions[1] == 'close':
             print('Type \'close\'. Saves the picture as \'filename_edited\' and closes the picture. '
                   'Now you can load another one.')
@@ -116,7 +116,7 @@ while intext != 'end':
                 print('File does not exist')
                 filename = ''
             elif filename.split('.')[1] != 'jpg' and filename.split('.')[1] != 'jpeg' and filename.split('.')[1] != 'png':
-                print('Wrong file time, only jpeg supported, sorry')
+                print('Wrong file time, only jpeg and png supported, sorry')
                 filename = ''
             else:
                 print('Loading file: ' + filename)
@@ -180,7 +180,7 @@ while intext != 'end':
         elif intext == 'negative':
             print('Making a negative of the image')
             if image.shape[2] == 4:
-                image = np.absolute([255,255,255,0] - image)
+                image = np.absolute([255, 255, 255, 0] - image)
             else:
                 image = np.uint8(255 - image)
             print('Done')
