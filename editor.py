@@ -10,8 +10,13 @@ def save(image, filename):
     extension = filename.split('.')[1]
     newfile = filename.split('.')[0] + '_edited.' + extension
     print('Saving image as ' + newfile + ' and closing')
-    out = Image.fromarray(image, 'RGB')
-    out.save(newfile)
+    if extension == 'jpg' or extension == 'jpeg':
+        out = Image.fromarray(image, 'RGB')
+        out.save(newfile, 'JPEG')
+
+    elif extension == 'png':
+        out = Image.fromarray(np.uint8(image), 'RGBA')
+        out.save(newfile, 'PNG')
 
 
 
@@ -109,7 +114,8 @@ while intext != 'end':
             filename = intext.split(' ')[1]
             if not Path(filename).exists():
                 print('File does not exist')
-            elif filename.split('.')[1] != 'jpg' and filename.split('.')[1] != 'jpeg':
+                filename = ''
+            elif filename.split('.')[1] != 'jpg' and filename.split('.')[1] != 'jpeg' and filename.split('.')[1] != 'png':
                 print('Wrong file time, only jpeg supported, sorry')
                 filename = ''
             else:
@@ -117,6 +123,7 @@ while intext != 'end':
                 im = Image.open(filename)
                 image = np.asarray(im)
                 print('Done')
+                #np.set_printoptions(threshold=np.nan)
                 #print(image)
 
     elif filename != '':
@@ -172,7 +179,10 @@ while intext != 'end':
         #pixel = 255 - pixel
         elif intext == 'negative':
             print('Making a negative of the image')
-            image = 255 - image
+            if image.shape[2] == 4:
+                image = np.absolute([255,255,255,0] - image)
+            else:
+                image = np.uint8(255 - image)
             print('Done')
 
 #-------------------GRAYSCALE----------------#
@@ -251,7 +261,7 @@ while intext != 'end':
             sharpenimage = image.copy()
             for i in range(1, imgsize[0] - 1):
                 for j in range(1, imgsize[1] - 1):
-                    for k in range(imgsize[2]):
+                    for k in range(3):
                         pixel = 9 * image[i][j][k] - image[i+1][j+1][k] - image[i+1][j][k] - image[i+1][j-1][k] - image[i][j+1][k] - image[i][j-1][k] - image[i-1][j+1][k] - image[i-1][j][k] - image[i-1][j-1][k]
                     #for col in range(imgsize[2]):
                         if pixel > 0:
